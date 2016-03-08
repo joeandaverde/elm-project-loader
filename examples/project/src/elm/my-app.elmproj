@@ -1,0 +1,7 @@
+{
+   "elm-package-dir": "./",
+   "main-modules": [
+      "./Components/WidgetA/Main.elm",
+      "./Components/WidgetB/Main.elm"
+   ]
+}
