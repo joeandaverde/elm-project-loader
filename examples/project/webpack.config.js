@@ -16,7 +16,7 @@ module.exports = {
          loader: '../../../index.js',
       }],
 
-      noParse: /\.elm$/,
+      noParse: /\.elmproj$/,
    },
 
    devServer: {

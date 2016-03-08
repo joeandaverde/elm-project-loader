@@ -8,19 +8,21 @@ const CreateSolution = (options) => {
    const project = options.project
 
    const elmPackageDir = Path.join(Path.dirname(options.projectFile), project['elm-package-dir'])
+   const sourceDir = Path.join(Path.dirname(options.projectFile), project['source-dir'])
 
    const fullModulePaths = _.map(project['main-modules'], m => {
-      return Path.join(elmPackageDir, m)
+      return Path.join(sourceDir, m)
    })
 
    return Promise.resolve({
       'elm-package-dir': elmPackageDir,
+      'source-dir': sourceDir,
       'cache-dependency-resolve': false,
       'main-modules': fullModulePaths,
    })
 }
 
-const ExtractImports = (regex) => {
+const ExtractImports = (importRegex) => {
    return (fileName) => {
       return new Promise((resolve, reject) => {
          Fs.readFile(fileName, (err, contents) => {
@@ -75,7 +77,7 @@ const FindDependencies = (solution) => {
    .then(modules => _.sortBy(modules, _.identity))
    .then(modules => {
       return modules.map(m => {
-         return Path.join(solution['elm-package-dir'], m.replace(/\.+/g, '/'))
+         return Path.join(solution['source-dir'], m.replace(/\.+/g, '/'))
       })
    })
    .then(paths => {
@@ -107,9 +109,6 @@ const ElmProjectLoader = (options) => {
             solution: solution,
          }
       })
-   })
-   .then(result => {
-      return result.output
    })
 }
 

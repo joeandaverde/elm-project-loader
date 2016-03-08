@@ -1,3 +1,3 @@
-const Elm = require('./elm/my-app.elmproj')
+const Elm = require('../my-app.elmproj')
 
 console.log(Elm)

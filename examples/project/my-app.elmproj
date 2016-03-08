@@ -1,5 +1,6 @@
 {
    "elm-package-dir": "./",
+   "source-dir": "./src/elm",
    "main-modules": [
       "./Components/WidgetA/Main.elm",
       "./Components/WidgetB/Main.elm"
