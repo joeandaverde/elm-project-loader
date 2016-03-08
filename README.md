@@ -17,12 +17,26 @@ var Elm = require('elm-project-loader!./path-to-elm-project')
 
 A JSON file that specifies the location of the `elm-package.json`, the main files to build, and the root of your project files.
 
-my-app.elmproj
+**Assuming the file structure:**
+
+```
+/app
+   /src
+   |   /elm
+   |----  /Components
+   |-------- /WidgetA
+   |----------- Main.elm
+   |-------- /WidgetB
+   |----------- Main.elm
+   |
+   elm-package.json
+   my-app.elmproj
+```  
 
 ```json
 {
    "elm-package-dir": "./",
-   "src-dir": "./",
+   "source-dir": "./src/elm",
    "main-modules": [
       "./Components/WidgetA/Main.elm",
       "./Components/WidgetB/Main.elm"
