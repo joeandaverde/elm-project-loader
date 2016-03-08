@@ -49,51 +49,73 @@ const ExtractImports = (importRegex) => {
    }
 }
 
-const CheckExtension = (basePath, extension) => {
+const CheckExtension = (basePath, extension, cache) => {
    return (relativePath) => {
+      const fullPath = Path.join(basePath, relativePath + extension)
+
+      if (cache[fullPath]) {
+         return Promise.resolve(cache[fullPath])
+      }
+
       return new Promise((resolve) => {
-         const fullPath = Path.join(basePath, relativePath + extension)
          Fs.access(fullPath, Fs.R_OK, (err) => {
-            resolve(err ? false : fullPath)
+            cache[fullPath] = err ? false : fullPath
+            resolve(cache[fullPath])
          })
       })
    }
 }
 
-const FilterNonExistentFiles = (paths, tests) => {
-   return Promise.all(_.map(paths, (path) => {
-      return _.reduce(tests, (promiseChain, test) => {
-         return promiseChain.then((res) => {
-            if (res) {
-               return res
-            }
-            return test(path)
-         })
-      }, Promise.resolve(false))
-   }))
-   .then(x => _.compact(_.flatten(x)))
+const RunFileTests = (tests, pathPart) => {
+   return _.reduce(tests, (promiseChain, test) => {
+      return promiseChain.then((res) => {
+         if (res) {
+            return res
+         }
+         return test(pathPart)
+      })
+   }, Promise.resolve(false))
 }
 
-const FindDependencies = (solution) => {
-   const importRegex = /^import\s+([^\s]+)/
-   const parseTasks = _.map(solution['main-modules'], ExtractImports(importRegex))
+const importRegex = /^import\s+([^\s]+)/
+
+const _CrawlDependencies = (paths, fileTests, dependencies, cache) => {
+   if (_.isEmpty(paths)) {
+      return Promise.resolve(_.sortBy(dependencies, _.identity))
+   }
+
+   const unvisitedPaths = _.filter(paths, p => !cache[p])
+   const newCache = _.merge(cache, _.keyBy(unvisitedPaths, _.identity))
+
+   const parseTasks = _.map(unvisitedPaths, ExtractImports(importRegex))
 
    return Promise.all(parseTasks)
    .then(x => _.uniq(_.flatten(x)))
-   .then(modules => _.sortBy(modules, _.identity))
    .then(modules => _.map(modules, m => m.replace(/\.+/g, '/')))
    .then(modulePaths => {
-      const sourceDirs = solution['elm-package']['source-directories']
-      const elmPackageDir = solution['elm-package-dir']
-      return FilterNonExistentFiles(modulePaths, _.flatMap(sourceDirs, d => {
-         const packageRelativeDir = Path.join(elmPackageDir, d)
-
-         return [
-            CheckExtension(packageRelativeDir, '.elm'),
-            CheckExtension(packageRelativeDir, '.js'),
-         ]
+      return Promise.all(_.map(modulePaths, modulePath => {
+         return RunFileTests(fileTests, modulePath)
       }))
+      .then(x => _.compact(_.flatten(x)))
    })
+   .then(newDependencies => {
+      return _CrawlDependencies(newDependencies, fileTests, _.uniq(dependencies.concat(newDependencies)), newCache)
+   })
+}
+
+const CrawlDependencies = (solution) => {
+   const elmPackageDir = solution['elm-package-dir']
+   const sourceDirs = solution['elm-package']['source-directories']
+   const checkCache = {}
+   const searchDirs = _.map(sourceDirs, d => Path.join(elmPackageDir, d))
+   const fileTests = _.flatMap(searchDirs, d => {
+      return [
+         CheckExtension(d, '.elm', checkCache),
+         CheckExtension(d, '.js', checkCache),
+      ]
+   })
+
+   return _CrawlDependencies(solution['main-modules'], fileTests, solution['main-modules'], {})
 }
 
 const Compile = (solution) => {
@@ -109,7 +131,7 @@ const Compile = (solution) => {
 const ElmProjectLoader = (options) => {
    return CreateSolution(options)
    .then(solution => {
-      return Promise.all([Compile(solution), FindDependencies(solution)])
+      return Promise.all([Compile(solution), CrawlDependencies(solution)])
       .then(results => {
          return {
             output: results[0],

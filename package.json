@@ -1,6 +1,6 @@
 {
    "name": "elm-project-loader",
-   "version": "0.0.2",
+   "version": "0.0.3",
    "description": "Webpack Loader for Elm Projects.",
    "main": "index.js",
    "scripts": {
