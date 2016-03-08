@@ -1,10 +1,10 @@
 # elm-project-loader
 
-Specify location of main modules to build using an elm project file. 
+Specify location of main modules to build using an elm project file.
 
 ## Usage
 
-```bash 
+```bash
 npm install elm-project-loader
 ```
 
@@ -36,10 +36,9 @@ A JSON file that specifies the location of the `elm-package.json`, the main file
 ```json
 {
    "elm-package-dir": "./",
-   "source-dir": "./src/elm",
    "main-modules": [
-      "./Components/WidgetA/Main.elm",
-      "./Components/WidgetB/Main.elm"
+      "./src/elm/Components/WidgetA/Main.elm",
+      "./src/elm/Components/WidgetB/Main.elm"
    ]
 }
 ```
