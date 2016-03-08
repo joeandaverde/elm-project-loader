@@ -19,6 +19,7 @@ A JSON file that specifies the location of the `elm-package.json`, the main file
 
 **Assuming the file structure:**
 
+```
 /app
    /src
    |   /elm
@@ -30,7 +31,7 @@ A JSON file that specifies the location of the `elm-package.json`, the main file
    |
    elm-package.json
    my-app.elmproj
-   
+```  
 
 ```json
 {
