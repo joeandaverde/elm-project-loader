@@ -5,20 +5,25 @@ const NodeElmCompiler = require('node-elm-compiler')
 const Fs = require('fs')
 
 const CreateSolution = (options) => {
-   const project = options.project
+   return new Promise((resolve, reject) => {
+      const relativeToProject = (path) => {
+         return Path.join(Path.dirname(options.projectFile), path)
+      }
 
-   const elmPackageDir = Path.join(Path.dirname(options.projectFile), project['elm-package-dir'])
-   const sourceDir = Path.join(Path.dirname(options.projectFile), project['source-dir'])
+      const elmPackageDir = relativeToProject(options.project['elm-package-dir'])
 
-   const fullModulePaths = _.map(project['main-modules'], m => {
-      return Path.join(sourceDir, m)
-   })
+      Fs.readFile(Path.join(elmPackageDir, 'elm-package.json'), (err, contents) => {
+         if (err) {
+            return reject(err)
+         }
 
-   return Promise.resolve({
-      'elm-package-dir': elmPackageDir,
-      'source-dir': sourceDir,
-      'cache-dependency-resolve': false,
-      'main-modules': fullModulePaths,
+         return resolve({
+            'elm-package-dir': elmPackageDir,
+            'main-modules': _.map(options.project['main-modules'], relativeToProject),
+            'elm-package': JSON.parse(contents),
+            'cache-dependency-resolve': false,
+         })
+      })
    })
 }
 
@@ -44,11 +49,12 @@ const ExtractImports = (importRegex) => {
    }
 }
 
-const CheckExtension = (extension) => {
-   return (basePath) => {
+const CheckExtension = (basePath, extension) => {
+   return (relativePath) => {
       return new Promise((resolve) => {
-         Fs.access(basePath + extension, Fs.R_OK, (err) => {
-            resolve(err ? false : (basePath + extension))
+         const fullPath = Path.join(basePath, relativePath, extension)
+         Fs.access(fullPath, Fs.R_OK, (err) => {
+            resolve(err ? false : fullPath)
          })
       })
    }
@@ -75,16 +81,19 @@ const FindDependencies = (solution) => {
    return Promise.all(parseTasks)
    .then(x => _.uniq(_.flatten(x)))
    .then(modules => _.sortBy(modules, _.identity))
-   .then(modules => {
-      return modules.map(m => {
-         return Path.join(solution['source-dir'], m.replace(/\.+/g, '/'))
-      })
-   })
-   .then(paths => {
-      return FilterNonExistentFiles(paths, [
-         CheckExtension('.elm'),
-         CheckExtension('.js'),
-      ])
+   .then(modules => _.map(m => m.replace(/\.+/g, '/')))
+   .then(modulePaths => {
+      const sourceDirs = solution['elm-package']['source-directories']
+      const elmPackageDir = solution['elm-package-dir']
+
+      return FilterNonExistentFiles(modulePaths, _.flatMap(sourceDirs, d => {
+         const packageRelativeDir = Path.join(elmPackageDir, d)
+
+         return [
+            CheckExtension(packageRelativeDir, '.elm'),
+            CheckExtension(packageRelativeDir, '.js'),
+         ]
+      }))
    })
 }
 
