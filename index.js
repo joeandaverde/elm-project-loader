@@ -52,7 +52,7 @@ const ExtractImports = (importRegex) => {
 const CheckExtension = (basePath, extension) => {
    return (relativePath) => {
       return new Promise((resolve) => {
-         const fullPath = Path.join(basePath, relativePath, extension)
+         const fullPath = Path.join(basePath, relativePath + extension)
          Fs.access(fullPath, Fs.R_OK, (err) => {
             resolve(err ? false : fullPath)
          })
@@ -81,11 +81,10 @@ const FindDependencies = (solution) => {
    return Promise.all(parseTasks)
    .then(x => _.uniq(_.flatten(x)))
    .then(modules => _.sortBy(modules, _.identity))
-   .then(modules => _.map(m => m.replace(/\.+/g, '/')))
+   .then(modules => _.map(modules, m => m.replace(/\.+/g, '/')))
    .then(modulePaths => {
       const sourceDirs = solution['elm-package']['source-directories']
       const elmPackageDir = solution['elm-package-dir']
-
       return FilterNonExistentFiles(modulePaths, _.flatMap(sourceDirs, d => {
          const packageRelativeDir = Path.join(elmPackageDir, d)
 
