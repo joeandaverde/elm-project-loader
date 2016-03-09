@@ -146,7 +146,7 @@ module.exports = function (source) {
    const callback = this.async()
 
    if (!callback) {
-      return callback(new Error('elm-project-loader only supports async mode.'))
+      throw new Error('elm-project-loader only supports async mode.')
    }
 
    return Promise.resolve()
