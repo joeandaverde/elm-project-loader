@@ -234,6 +234,7 @@ module.exports = function (source) {
       })
    })
    .catch(e => {
+      this.emitError(e)
       callback(e)
    })
 }
