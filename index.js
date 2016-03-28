@@ -19,6 +19,7 @@ const CreateSolution = (options) => {
          }
 
          return resolve({
+            'project-file': options.projectFile,
             'elm-package-dir': elmPackageDir,
             'main-modules': _.map(options.project['main-modules'], relativeToProject),
             'elm-package': JSON.parse(contents),
@@ -138,32 +139,28 @@ const Compile = (solution) => {
    return NodeElmCompiler.compileToString(solution['main-modules'], options)
 }
 
-
 const dependencyCache = {}
 
-const ElmProjectLoader = (options) => {
-   return CreateSolution(options)
-   .then(solution => {
-      const getDependencies = () => {
-         if (solution['cache-dependency-resolve'] && dependencyCache[options.projectFile]) {
-            return Promise.resolve(dependencyCache[options.projectFile])
-         }
-
-         return CrawlDependencies(solution)
-         .then(deps => {
-            dependencyCache[options.projectFile] = deps
-            return deps
-         })
+const ElmProjectLoader = (solution) => {
+   const getDependencies = () => {
+      if (solution['cache-dependency-resolve'] && dependencyCache[solution['project-file']]) {
+         return Promise.resolve(dependencyCache[solution['project-file']])
       }
 
-      return Promise.all([Compile(solution), getDependencies()])
-      .then(results => {
-         return {
-            output: results[0],
-            dependencies: results[1],
-            solution: solution,
-         }
+      return CrawlDependencies(solution)
+      .then(deps => {
+         dependencyCache[solution['project-file']] = deps
+         return deps
       })
+   }
+
+   return Promise.all([Compile(solution), getDependencies()])
+   .then(results => {
+      return {
+         output: results[0],
+         dependencies: results[1],
+         solution: solution,
+      }
    })
 }
 
@@ -183,13 +180,20 @@ module.exports = function (source) {
       }
    })
    .then(options => {
-      return ElmProjectLoader(options)
-      .then(loaded => {
-         loaded.solution['cache-dependency-resolve'] && this.cacheable()
+      return CreateSolution(options)
+      .then(solution => {
+         solution['cache-dependency-resolve'] && this.cacheable()
 
-         _.map(loaded.dependencies, d => this.addDependency(d))
+         if (solution['cache-dependency-resolve'] && dependencyCache[solution['project-file']]) {
+            _.map(dependencyCache[solution['project-file']], d => this.addDependency(d))
+         }
 
-         callback(null, [loaded.output, 'module.exports = Elm;'].join('\n'))
+         return ElmProjectLoader(solution)
+         .then(loaded => {
+            _.map(loaded.dependencies, d => this.addDependency(d))
+
+            callback(null, [loaded.output, 'module.exports = Elm;'].join('\n'))
+         })
       })
    })
    .catch(e => {
