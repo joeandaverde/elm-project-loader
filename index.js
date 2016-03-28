@@ -3,6 +3,7 @@ const Path = require('path')
 const LoaderUtils = require('loader-utils')
 const NodeElmCompiler = require('node-elm-compiler')
 const Fs = require('fs')
+const GlobFs = require('glob-fs')
 
 const CreateSolution = (options) => {
    return new Promise((resolve, reject) => {
@@ -21,7 +22,7 @@ const CreateSolution = (options) => {
             'elm-package-dir': elmPackageDir,
             'main-modules': _.map(options.project['main-modules'], relativeToProject),
             'elm-package': JSON.parse(contents),
-            'cache-dependency-resolve': false,
+            'cache-dependency-resolve': (options.project['cache-dependency-resolve'] || 'false').toString() === 'true',
          })
       })
    })
@@ -79,8 +80,8 @@ const RunFileTests = (tests, pathPart) => {
 
 const importRegex = /^import\s+([^\s]+)/
 
-const _CrawlDependencies = (paths, fileTests, dependencies, cache) => {
-   if (_.isEmpty(paths)) {
+const _CrawlDependencies = (paths, fileTests, dependencies, remainingPossibleFiles, cache) => {
+   if (_.isEmpty(paths) || _.isEmpty(remainingPossibleFiles)) {
       return Promise.resolve(_.sortBy(dependencies, _.identity))
    }
 
@@ -99,7 +100,7 @@ const _CrawlDependencies = (paths, fileTests, dependencies, cache) => {
       .then(x => _.compact(_.flatten(x)))
    })
    .then(newDependencies => {
-      return _CrawlDependencies(newDependencies, fileTests, _.uniq(dependencies.concat(newDependencies)), newCache)
+      return _CrawlDependencies(newDependencies, fileTests, _.uniq(dependencies.concat(newDependencies)), _.difference(remainingPossibleFiles, newDependencies), newCache)
    })
 }
 
@@ -115,7 +116,16 @@ const CrawlDependencies = (solution) => {
       ]
    })
 
-   return _CrawlDependencies(solution['main-modules'], fileTests, solution['main-modules'], {})
+   // Start by listing all js and elm files dependencies
+   return Promise.all(_.map(searchDirs, p => {
+      return GlobFs({ gitignore: true, dotfiles: true })
+      .readdirPromise('**/*.+(js|elm)', { cwd: p })
+      .then(res => _.filter(res, r => /(js|elm)$/i.test(r)))
+   }))
+   .then(results => _.uniq(_.flatten(results)))
+   .then(allPossibleFiles => {
+      return _CrawlDependencies(solution['main-modules'], fileTests, solution['main-modules'], _.difference(allPossibleFiles, solution['main-modules']), {})
+   })
 }
 
 const Compile = (solution) => {
@@ -128,10 +138,25 @@ const Compile = (solution) => {
    return NodeElmCompiler.compileToString(solution['main-modules'], options)
 }
 
+
+const dependencyCache = {}
+
 const ElmProjectLoader = (options) => {
    return CreateSolution(options)
    .then(solution => {
-      return Promise.all([Compile(solution), CrawlDependencies(solution)])
+      const getDependencies = () => {
+         if (solution['cache-dependency-resolve'] && dependencyCache[options.projectFile]) {
+            return Promise.resolve(dependencyCache[options.projectFile])
+         }
+
+         return CrawlDependencies(solution)
+         .then(deps => {
+            dependencyCache[options.projectFile] = deps
+            return deps
+         })
+      }
+
+      return Promise.all([Compile(solution), getDependencies()])
       .then(results => {
          return {
             output: results[0],
