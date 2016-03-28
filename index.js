@@ -1,9 +1,13 @@
+'use strict';
+
 const _ = require('lodash')
 const Path = require('path')
 const LoaderUtils = require('loader-utils')
 const NodeElmCompiler = require('node-elm-compiler')
 const Fs = require('fs')
 const GlobFs = require('glob-fs')
+const Spawn = require('child_process').spawn
+const TempFile = require('temp')
 
 const CreateSolution = (options) => {
    return new Promise((resolve, reject) => {
@@ -130,13 +134,46 @@ const CrawlDependencies = (solution) => {
 }
 
 const Compile = (solution) => {
-   const options = {
-      yes: true,
-      emitWarning: true,
-      cwd: solution['elm-package-dir'],
+   const collectOutput = (stream) => {
+      let output = ''
+
+      stream.on('data', d => output += d)
+
+      return {
+         data: () => output
+      }
    }
 
-   return NodeElmCompiler.compileToString(solution['main-modules'], options)
+   return new Promise((resolve, reject) => {
+      TempFile.open({ prefix: 'elm-project', suffix: '.js' }, (err, info) => {
+         if (err) return reject(err)
+
+         const elmMakeArgs = [ '--yes', '--output', info.path ].concat(solution['main-modules'])
+
+         const elmMakeProc = Spawn('elm-make', elmMakeArgs, {
+            cwd: solution['elm-package-dir'],
+         })
+
+         let stdOut = collectOutput(elmMakeProc.stdout)
+         let stdErr = collectOutput(elmMakeProc.stderr)
+
+         elmMakeProc.on('close', (code) => {
+            if (code !== 0) {
+               return reject(stdOut.data() + '\n' + stdErr.data())
+            }
+
+            Fs.readFile(info.path, (err, compiledOutput) => {
+               if (err) return reject(err)
+
+               Fs.unlink(info.path, () => {
+                  /* Ignore error with unlink */
+               })
+
+               return resolve(compiledOutput)
+            })
+         })
+      })
+   })
 }
 
 const dependencyCache = {}
