@@ -1,13 +1,22 @@
-module Components.WidgetA.Update where
+module Components.WidgetA.Update exposing (..)
 
-import Effects exposing (Effects)
 import Components.WidgetA.Model exposing (..)
 
-type Action = Increment | Decrement | NoOp
 
-update : Action -> Model -> (Model, Effects Action)
-update action model =
-  case action of
-    Increment -> (model + 1, Effects.none)
-    Decrement -> (model - 1, Effects.none)
-    NoOp -> (model, Effects.none)
+type Msg
+    = Increment
+    | Decrement
+    | NoOp
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        Increment ->
+            ( model + 1, Cmd.none )
+
+        Decrement ->
+            ( model - 1, Cmd.none )
+
+        NoOp ->
+            ( model, Cmd.none )

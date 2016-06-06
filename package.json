@@ -1,6 +1,6 @@
 {
   "name": "elm-project-loader",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "Webpack Loader for Elm Projects.",
   "main": "index.js",
   "scripts": {
@@ -13,7 +13,6 @@
     "glob-fs": "^0.1.6",
     "loader-utils": "^0.2.12",
     "lodash": "^4.6.1",
-    "node-elm-compiler": "^3.0.0",
     "temp": "^0.8.3"
   }
 }
