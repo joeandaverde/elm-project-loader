@@ -3,7 +3,6 @@
 const _ = require('lodash')
 const Path = require('path')
 const LoaderUtils = require('loader-utils')
-const NodeElmCompiler = require('node-elm-compiler')
 const Fs = require('fs')
 const GlobFs = require('glob-fs')
 const Spawn = require('child_process').spawn
@@ -229,7 +228,7 @@ module.exports = function (source) {
          .then(loaded => {
             _.map(loaded.dependencies, d => this.addDependency(d))
 
-            callback(null, [loaded.output, 'module.exports = Elm;'].join('\n'))
+            callback(null, loaded.output)
          })
       })
    })

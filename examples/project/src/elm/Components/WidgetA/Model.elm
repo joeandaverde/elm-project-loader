@@ -1,10 +1,10 @@
-module Components.WidgetA.Model (..) where
+module Components.WidgetA.Model exposing (..)
 
 
 type alias Model =
-  Int
+    Int
 
 
 initialModel : Model
 initialModel =
-  0
+    0
