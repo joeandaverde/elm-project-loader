@@ -173,6 +173,18 @@ const Compile = (solution) => {
          })
       })
    })
+   .then((output) => {
+      return {
+         output,
+         err: null
+      }
+   })
+   .catch((err) => {
+      return {
+         output: null,
+         err
+      }
+   })
 }
 
 const dependencyCache = {}
@@ -193,7 +205,7 @@ const ElmProjectLoader = (solution) => {
    return Promise.all([Compile(solution), getDependencies()])
    .then(results => {
       return {
-         output: results[0],
+         result: results[0],
          dependencies: results[1],
          solution: solution,
       }
@@ -228,7 +240,11 @@ module.exports = function (source) {
          .then(loaded => {
             _.map(loaded.dependencies, d => this.addDependency(d))
 
-            callback(null, loaded.output)
+            if (loaded.result.err) {
+               throw loaded.result.err
+            }
+
+            callback(null, loaded.result.output)
          })
       })
    })
