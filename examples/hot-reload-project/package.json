@@ -1,0 +1,18 @@
+{
+  "name": "elm-project-loader-hot-example",
+  "author": "Joe Andaverde",
+  "version": "1.0.0",
+  "description": "Example of requiring a Webpack Elm Project.",
+  "scripts": {
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "preserve": "npm run build",
+    "serve": "webpack-dev-server --hot --inline --port 3000"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "elm-hot-loader": "0.3.4",
+    "webpack": "1.13.2",
+    "webpack-dev-server": "1.16.2"
+  }
+}

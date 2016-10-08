@@ -2,7 +2,7 @@
    "elm-package-dir": "./",
    "cache-dependency-resolve": true,
    "main-modules": [
-      "./src/elm/Components/WidgetA/Main.elm",
-      "./src/elm/Components/WidgetB/Main.elm"
+      "../elm/Components/WidgetA/Main.elm",
+      "../elm/Components/WidgetB/Main.elm"
    ]
 }

@@ -1,10 +1,10 @@
 {
    "version": "1.0.0",
-   "summary": "Multiple main module Example",
+   "summary": "Live Reloaded Multiple main module Example",
    "repository": "https://github.com/joeandaverde/elm-project-loader-example.git",
    "license": "MIT",
    "source-directories": [
-      "./src/elm"
+      "../elm"
    ],
    "exposed-modules": [],
    "dependencies": {

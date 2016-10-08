@@ -10,6 +10,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "webpack": "^1.12.14"
+    "webpack": "1.13.2",
+    "webpack-dev-server": "1.16.2"
   }
 }
