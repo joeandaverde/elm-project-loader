@@ -4,7 +4,7 @@ const _ = require('lodash')
 const Path = require('path')
 const LoaderUtils = require('loader-utils')
 const Fs = require('fs')
-const GlobFs = require('glob-fs')
+const Globby = require('globby')
 const Spawn = require('child_process').spawn
 const TempFile = require('temp')
 
@@ -122,9 +122,10 @@ const CrawlDependencies = (solution) => {
 
    // Start by listing all js and elm files dependencies
    return Promise.all(_.map(searchDirs, p => {
-      return GlobFs({ gitignore: true, dotfiles: true })
-      .readdirPromise('**/*.+(js|elm)', { cwd: p })
-      .then(res => _.filter(res, r => /(js|elm)$/i.test(r)))
+      return Globby([Path.join(p, '**/*.+(js|elm)')])
+      .then(paths => {
+         return _.filter(paths, r => /(js|elm)$/i.test(r))
+      })
    }))
    .then(results => _.uniq(_.flatten(results)))
    .then(allPossibleFiles => {
