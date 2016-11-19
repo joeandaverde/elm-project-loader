@@ -1,6 +1,6 @@
 module Components.WidgetA.Main exposing (..)
 
-import Html.App as Html
+import Html
 import Components.WidgetA.Model exposing (Model, initialModel)
 import Components.WidgetA.View exposing (view)
 import Components.WidgetA.Update as Update exposing (update)
