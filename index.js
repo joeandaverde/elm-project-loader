@@ -27,6 +27,7 @@ const CreateSolution = (options) => {
             'main-modules': _.map(options.project['main-modules'], relativeToProject),
             'elm-package': JSON.parse(contents),
             'cache-dependency-resolve': (options.project['cache-dependency-resolve'] || 'false').toString() === 'true',
+            'query-params': options.params,
          })
       })
    })
@@ -147,7 +148,9 @@ const Compile = (solution) => {
       TempFile.open({ prefix: 'elm-project', suffix: '.js' }, (err, info) => {
          if (err) return reject(err)
 
-         const elmMakeArgs = [ '--yes', '--output', info.path ].concat(solution['main-modules'])
+         const debug = solution['query-params']['debug'] ? '--debug' : ''
+
+         const elmMakeArgs = _.compact([debug, '--yes', '--output', info.path ].concat(solution['main-modules']))
 
          const elmMakeProc = Spawn('elm-make', elmMakeArgs, {
             cwd: solution['elm-package-dir'],
