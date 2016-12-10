@@ -1,5 +1,5 @@
 {
-  "name": "elm-project-loader",
+  "name": "elm-webpack-project-loader",
   "version": "2.2.0",
   "description": "Webpack Loader for Elm Projects.",
   "main": "index.js",

@@ -21,7 +21,7 @@ module.exports = {
          test: /\.elmproj$/,
          loaders: [
             'elm-hot',
-            '../../../index.js', // elm-project-loader when installed via npm
+            '../../../index.js', // elm-webpack-project-loader when installed via npm
          ],
       }],
 

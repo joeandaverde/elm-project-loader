@@ -1,4 +1,4 @@
-# elm-project-loader
+# elm-webpack-project-loader
 
 Specify location of main modules to build using an elm project file.
 
@@ -7,7 +7,7 @@ Specify location of main modules to build using an elm project file.
 1. Install the node package
 
 ```bash
-npm install elm-project-loader
+npm install elm-webpack-project-loader
 ```
 
 2. Add the `.elmproj` webpack loader.

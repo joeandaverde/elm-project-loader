@@ -1,5 +1,5 @@
 {
-  "name": "elm-project-loader-example",
+  "name": "elm-webpack-project-loader-example",
   "author": "Joe Andaverde",
   "version": "1.0.0",
   "description": "Example of requiring a Webpack Elm Project.",
