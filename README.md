@@ -61,3 +61,19 @@ A JSON file that specifies the location of the `elm-package.json`, the main file
    ]
 }
 ```
+
+## Using the Elm Debugger
+
+Append the 'debug' query string to the end of the loader.
+
+```javascript
+module: {
+   loaders: [{
+      test: /\.elmproj$/,
+      loader: 'elm-project?debug=true',
+   }],
+
+   noParse: /\.elmproj$/,
+},
+
+```
