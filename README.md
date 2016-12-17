@@ -16,7 +16,7 @@ npm install elm-webpack-project-loader
 module: {
    loaders: [{
       test: /\.elmproj$/,
-      loader: 'elm-project',
+      loader: 'elm-webpack-project',
    }],
 
    noParse: /\.elmproj$/,
@@ -70,7 +70,7 @@ Append the 'debug' query string to the end of the loader.
 module: {
    loaders: [{
       test: /\.elmproj$/,
-      loader: 'elm-project?debug=true',
+      loader: 'elm-webpack-project?debug=true',
    }],
 
    noParse: /\.elmproj$/,
