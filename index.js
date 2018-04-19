@@ -225,9 +225,9 @@ module.exports = function (source) {
    return Promise.resolve()
    .then(() => {
       return {
-         params: LoaderUtils.parseQuery(this.query),
+         params: LoaderUtils.getOptions(this) || {},
          project: JSON.parse(source),
-         projectFile: LoaderUtils.getRemainingRequest(this),
+         projectFile: LoaderUtils.getRemainingRequest(this)
       }
    })
    .then(options => {

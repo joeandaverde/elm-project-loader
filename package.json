@@ -1,6 +1,6 @@
 {
   "name": "elm-webpack-project-loader",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "description": "Webpack Loader for Elm Projects.",
   "main": "index.js",
   "scripts": {
@@ -9,10 +9,9 @@
   "author": "Joe Andaverde",
   "license": "MIT",
   "dependencies": {
-    "glob": "^7.0.3",
-    "glob-fs": "^0.1.6",
-    "loader-utils": "^0.2.12",
-    "lodash": "^4.6.1",
+    "glob-fs": "^0.1.7",
+    "loader-utils": "^1.1.0",
+    "lodash": "^4.17.5",
     "temp": "^0.8.3"
   }
 }
