@@ -43,8 +43,7 @@ const ExtractImports = importRegex => {
 
             const lines = contents.toString().split('\n')
 
-            const modules = _
-               .chain(lines)
+            const modules = _.chain(lines)
                .map(m => m.match(importRegex))
                .compact()
                .map(x => x[1])
@@ -170,7 +169,7 @@ const Compile = solution => {
 
          const elmArgs = _.compact(['make', debug, optimize, '--output', info.path].concat(solution['main-modules']))
 
-         const elmMakeProc = Spawn('/Users/stephen/code/elm-webpack-project-loader/elm', elmArgs, {
+         const elmMakeProc = Spawn('elm', elmArgs, {
             cwd: solution['elm-json-dir'],
          })
 
