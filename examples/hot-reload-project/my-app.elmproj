@@ -1,5 +1,5 @@
 {
-   "elm-package-dir": "./",
+   "elm-json-dir": "./",
    "cache-dependency-resolve": true,
    "main-modules": [
       "../elm/Components/WidgetA/Main.elm",

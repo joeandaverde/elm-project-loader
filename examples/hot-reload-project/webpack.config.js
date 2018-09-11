@@ -1,36 +1,33 @@
-var Webpack = require('webpack')
+var Webpack = require("webpack");
+var Path = require("path");
 
 module.exports = {
-   entry: './src/index.js',
+   entry: "./src/index.js",
 
    output: {
-      path: './dist',
-      filename: 'index.js'
+      path: Path.join(__dirname, "./dist"),
+      filename: "index.js"
    },
 
-   plugins: [
-      new Webpack.HotModuleReplacementPlugin()
-   ],
-
-   resolve: {
-      modulesDirectories: ['node_modules'],
-   },
+   plugins: [new Webpack.HotModuleReplacementPlugin()],
 
    module: {
-      loaders: [{
-         test: /\.elmproj$/,
-         loaders: [
-            'elm-hot',
-            '../../../index.js', // elm-webpack-project-loader when installed via npm
-         ],
-      }],
+      rules: [
+         {
+            test: /\.elmproj$/,
+            loaders: [
+               "elm-hot-loader",
+               Path.join(__dirname, "../../index.js") // elm-webpack-project-loader when installed via npm
+            ]
+         }
+      ],
 
-      noParse: /\.elmproj$/,
+      noParse: /\.elmproj$/
    },
 
    devServer: {
       inline: true,
       hot: true,
-      stats: 'errors-only',
-   },
+      stats: "errors-only"
+   }
 };

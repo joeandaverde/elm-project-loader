@@ -1,26 +1,26 @@
+const Path = require("path");
+
 module.exports = {
-   entry: './src/index.js',
+   entry: "./src/index.js",
 
    output: {
-      path: './dist',
-      filename: 'index.js'
-   },
-
-   resolve: {
-      modulesDirectories: ['node_modules'],
+      path: Path.join(__dirname, "./dist"),
+      filename: "index.js"
    },
 
    module: {
-      loaders: [{
-         test: /\.elmproj$/,
-         loader: '../../../index.js',
-      }],
+      rules: [
+         {
+            test: /\.elmproj$/,
+            loader: Path.join(__dirname, "../../index.js")
+         }
+      ],
 
-      noParse: /\.elmproj$/,
+      noParse: /\.elmproj$/
    },
 
    devServer: {
       inline: true,
-      stats: 'errors-only',
-   },
+      stats: "errors-only"
+   }
 };

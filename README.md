@@ -14,9 +14,9 @@ npm install elm-webpack-project-loader
 
 ```javascript
 module: {
-   loaders: [{
+   rules: [{
       test: /\.elmproj$/,
-      loader: 'elm-webpack-project',
+      loader: 'elm-webpack-project-loader',
    }],
 
    noParse: /\.elmproj$/,
@@ -48,7 +48,7 @@ A JSON file that specifies the location of the `elm-package.json`, the main file
    |
    elm-package.json
    my-app.elmproj
-```  
+```
 
 **The .elmproj file**
 
@@ -68,9 +68,9 @@ Append the 'debug' query string to the end of the loader.
 
 ```javascript
 module: {
-   loaders: [{
+   rules: [{
       test: /\.elmproj$/,
-      loader: 'elm-webpack-project?debug=true',
+      loader: 'elm-webpack-project-loader?debug=true',
    }],
 
    noParse: /\.elmproj$/,
