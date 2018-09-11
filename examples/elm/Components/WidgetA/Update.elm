@@ -9,14 +9,14 @@ type Msg
     | NoOp
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> Model
 update msg model =
     case msg of
         Increment ->
-            ( model + 1, Cmd.none )
+            model + 1
 
         Decrement ->
-            ( model - 1, Cmd.none )
+            model - 1
 
         NoOp ->
-            ( model, Cmd.none )
+            model

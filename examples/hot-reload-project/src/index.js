@@ -1,4 +1,4 @@
-const Elm = require('../my-app.elmproj')
+import { Elm } from '../my-app.elmproj'
 
-Elm.Components.WidgetA.Main.embed(document.getElementById('widgetA'))
-Elm.Components.WidgetB.Main.embed(document.getElementById('widgetB'))
+Elm.Components.WidgetA.Main.init({ node: document.getElementById('widgetA') })
+Elm.Components.WidgetB.Main.init({ node: document.getElementById('widgetB') })

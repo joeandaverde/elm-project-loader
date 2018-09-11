@@ -1,15 +1,15 @@
 module Components.WidgetA.Main exposing (..)
 
-import Html
+import Browser
 import Components.WidgetA.Model exposing (Model, initialModel)
+import Components.WidgetA.Update as Update exposing (Msg, update)
 import Components.WidgetA.View exposing (view)
-import Components.WidgetA.Update as Update exposing (update)
 
 
+main : Program () Model Msg
 main =
-    Html.program
-        { init = ( initialModel, Cmd.none )
+    Browser.sandbox
+        { init = initialModel
         , update = update
         , view = view
-        , subscriptions = \_ -> Sub.none
         }
