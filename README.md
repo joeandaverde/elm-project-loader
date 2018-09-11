@@ -32,7 +32,7 @@ var Elm = require('./path-to-elm-project.elmproj')
 
 ## Project File Structure
 
-A JSON file that specifies the location of the `elm-package.json`, the main files to build, and the root of your project files.
+A JSON file that specifies the location of the `elm.json`, the main files to build, and the root of your project files.
 
 **Assuming the file structure:**
 
@@ -46,7 +46,7 @@ A JSON file that specifies the location of the `elm-package.json`, the main file
    |-------- /WidgetB
    |----------- Main.elm
    |
-   elm-package.json
+   elm.json
    my-app.elmproj
 ```
 
@@ -54,7 +54,7 @@ A JSON file that specifies the location of the `elm-package.json`, the main file
 
 ```json
 {
-   "elm-package-dir": "./",
+   "elm-json-dir": "./",
    "main-modules": [
       "./src/elm/Components/WidgetA/Main.elm",
       "./src/elm/Components/WidgetB/Main.elm"
