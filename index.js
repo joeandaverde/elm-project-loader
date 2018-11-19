@@ -14,16 +14,16 @@ const CreateSolution = options => {
          return Path.join(Path.dirname(options.projectFile), path)
       }
 
-      const elmPackageDir = relativeToProject(options.project['elm-json-dir'])
+      const elmJsonDir = relativeToProject(options.project['elm-json-dir'])
 
-      Fs.readFile(Path.join(elmPackageDir, 'elm.json'), (err, contents) => {
+      Fs.readFile(Path.join(elmJsonDir, 'elm.json'), (err, contents) => {
          if (err) {
             return reject(err)
          }
 
          return resolve({
             'project-file': options.projectFile,
-            'elm-json-dir': elmPackageDir,
+            'elm-json-dir': elmJsonDir,
             'main-modules': _.map(options.project['main-modules'], relativeToProject),
             'elm-json': JSON.parse(contents),
             'cache-dependency-resolve': (options.project['cache-dependency-resolve'] || 'false').toString() === 'true',
@@ -55,9 +55,9 @@ const ExtractImports = importRegex => {
    }
 }
 
-const CheckExtension = (basePath, extension, cache) => {
+const CheckIfElmFileExists = (basePath, cache) => {
    return relativePath => {
-      const fullPath = Path.join(basePath, relativePath + extension)
+      const fullPath = Path.join(basePath, relativePath + '.elm')
 
       if (cache[fullPath]) {
          return Promise.resolve(cache[fullPath])
@@ -125,16 +125,15 @@ const CrawlDependencies = solution => {
    const sourceDirs = solution['elm-json']['source-directories']
    const checkCache = {}
    const searchDirs = _.map(sourceDirs, d => Path.join(elmPackageDir, d))
-   const fileTests = _.flatMap(searchDirs, d => {
-      return [CheckExtension(d, '.elm', checkCache), CheckExtension(d, '.js', checkCache)]
+   const fileTests = _.map(searchDirs, d => {
+      return CheckIfElmFileExists(d, checkCache)
    })
 
-   // Start by listing all js and elm files dependencies
    return Promise.all(
       _.map(searchDirs, p => {
          return GlobFs({ gitignore: true, dotfiles: true })
-            .readdirPromise('**/*.+(js|elm)', { cwd: p })
-            .then(res => _.filter(res, r => /(js|elm)$/i.test(r)))
+            .readdirPromise('**/*.elm', { cwd: p })
+            .then(res => _.filter(res, r => /elm$/i.test(r)))
       })
    )
       .then(results => _.uniq(_.flatten(results)))
