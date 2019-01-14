@@ -130,22 +130,41 @@ const CrawlDependencies = solution => {
    })
 
    return Promise.all(
-      _.map(searchDirs, p => {
-         return GlobFs({ gitignore: true, dotfiles: true })
-            .readdirPromise('**/*.elm', { cwd: p })
-            .then(res => _.filter(res, r => /elm$/i.test(r)))
-      })
-   )
+         _.map(searchDirs, p => {
+            return GlobFs({
+                  gitignore: true,
+                  dotfiles: true,
+               })
+               .readdirPromise('**/*.elm', {
+                  cwd: p,
+               })
+               .then(res => _.filter(res, r => /elm$/i.test(r)))
+         })
+      )
       .then(results => _.uniq(_.flatten(results)))
       .then(allPossibleFiles => {
          return _CrawlDependencies(
             solution['main-modules'],
             fileTests,
             solution['main-modules'],
-            _.difference(allPossibleFiles, solution['main-modules']),
-            {}
+            _.difference(allPossibleFiles, solution['main-modules']), {}
          )
       })
+}
+
+// Adapted from checkFiles by https://github.com/samrensenhouse
+const cleanMismatchedTempFiles = (elm_stuff_path, file_type_to_check, companion_file_type) => {
+   const files = GlobFs.readdirSync(`${elm_stuff_path}/**/*.${file_type_to_check}`)
+
+   _.forEach(files, file => {
+      const matching_file = `${file.replace(/\.[^/.]+$/, '')}.${companion_file_type}`
+
+      if (!Fs.existsSync(matching_file)) {
+         try {
+            Fs.unlinkSync(file)
+         } catch (e) {}
+      }
+   })
 }
 
 const Compile = solution => {
@@ -160,38 +179,50 @@ const Compile = solution => {
    }
 
    return new Promise((resolve, reject) => {
-      TempFile.open({ prefix: 'elm-project', suffix: '.js' }, (err, info) => {
-         if (err) return reject(err)
-
-         const debug = solution['query-params']['debug'] ? '--debug' : ''
-         const optimize = solution['query-params']['optimize'] ? '--optimize' : ''
-
-         const elmArgs = _.compact(['make', debug, optimize, '--output', info.path].concat(solution['main-modules']))
-
-         const elmMakeProc = Spawn('elm', elmArgs, {
-            cwd: solution['elm-json-dir'],
-         })
-
-         let stdOut = collectOutput(elmMakeProc.stdout)
-         let stdErr = collectOutput(elmMakeProc.stderr)
-
-         elmMakeProc.on('close', code => {
-            if (code !== 0) {
-               return reject(stdOut.data() + '\n' + stdErr.data())
-            }
-
-            Fs.readFile(info.path, (err, compiledOutput) => {
+         TempFile.open({
+               prefix: 'elm-project',
+               suffix: '.js',
+            },
+            (err, info) => {
                if (err) return reject(err)
 
-               Fs.unlink(info.path, () => {
-                  /* Ignore error with unlink */
+               const debug = solution['query-params']['debug'] ? '--debug' : ''
+               const optimize = solution['query-params']['optimize'] ? '--optimize' : ''
+
+               const elmArgs = _.compact(['make', debug, optimize, '--output', info.path].concat(solution['main-modules']))
+
+               if (process.env.NODE_ENV !== 'production') {
+                  const elm_stuff_path = Path.join(solution['elm-json-dir'], 'elm-stuff')
+
+                  cleanMismatchedTempFiles(elm_stuff_path, 'elmi', 'elmo')
+                  cleanMismatchedTempFiles(elm_stuff_path, 'elmo', 'elmi')
+               }
+
+               const elmMakeProc = Spawn('elm', elmArgs, {
+                  cwd: solution['elm-json-dir'],
                })
 
-               return resolve(compiledOutput)
-            })
-         })
+               let stdOut = collectOutput(elmMakeProc.stdout)
+               let stdErr = collectOutput(elmMakeProc.stderr)
+
+               elmMakeProc.on('close', code => {
+                  if (code !== 0) {
+                     return reject(stdOut.data() + '\n' + stdErr.data())
+                  }
+
+                  Fs.readFile(info.path, (err, compiledOutput) => {
+                     if (err) return reject(err)
+
+                     Fs.unlink(info.path, () => {
+                        /* Ignore error with unlink */
+                     })
+
+                     return resolve(compiledOutput)
+                  })
+               })
+            }
+         )
       })
-   })
       .then(output => {
          return {
             output,
@@ -229,7 +260,7 @@ const ElmProjectLoader = solution => {
    })
 }
 
-module.exports = function(source) {
+module.exports = function (source) {
    const callback = this.async()
 
    if (!callback) {
