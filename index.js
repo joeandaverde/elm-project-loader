@@ -153,18 +153,26 @@ const CrawlDependencies = solution => {
 }
 
 // Adapted from checkFiles by https://github.com/samrensenhouse
-const cleanMismatchedTempFiles = (elm_stuff_path, file_type_to_check, companion_file_type) => {
-   const files = GlobFs.readdirSync(`${elm_stuff_path}/**/*.${file_type_to_check}`)
+const cleanMismatchedTempFiles = (file_type_to_check, companion_file_type) => {
+   try {
+      const files = GlobFs({
+         gitignore: false,
+         dotfiles: true,
+      }).readdirSync(`elm-stuff/**/*.${file_type_to_check}`)
 
-   _.forEach(files, file => {
-      const matching_file = `${file.replace(/\.[^/.]+$/, '')}.${companion_file_type}`
+      _.forEach(files, file => {
+         const matching_file = `${file.replace(/\.[^/.]+$/, '')}.${companion_file_type}`
 
-      if (!Fs.existsSync(matching_file)) {
-         try {
-            Fs.unlinkSync(file)
-         } catch (e) {}
-      }
-   })
+         if (!Fs.existsSync(matching_file)) {
+            try {
+               Fs.unlinkSync(file)
+            } catch (e) {}
+         }
+      })
+
+   } catch (error) {
+      console.log(`Error cleaning mismatched ${companion_file_type} files`, error)
+   }
 }
 
 const Compile = solution => {
@@ -192,10 +200,8 @@ const Compile = solution => {
                const elmArgs = _.compact(['make', debug, optimize, '--output', info.path].concat(solution['main-modules']))
 
                if (process.env.NODE_ENV !== 'production') {
-                  const elm_stuff_path = Path.join(solution['elm-json-dir'], 'elm-stuff')
-
-                  cleanMismatchedTempFiles(elm_stuff_path, 'elmi', 'elmo')
-                  cleanMismatchedTempFiles(elm_stuff_path, 'elmo', 'elmi')
+                  cleanMismatchedTempFiles('elmi', 'elmo')
+                  cleanMismatchedTempFiles('elmo', 'elmi')
                }
 
                const elmMakeProc = Spawn('elm', elmArgs, {
