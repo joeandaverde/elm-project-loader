@@ -161,7 +161,8 @@ const cleanMismatchedTempFiles = (file_type_to_check, companion_file_type) => {
       }).readdirSync(`elm-stuff/**/*.${file_type_to_check}`)
 
       _.forEach(files, file => {
-         const matching_file = `${file.replace(/\.[^/.]+$/, '')}.${companion_file_type}`
+         const parsed = Path.parse(file)
+         const matching_file = Path.resolve(parsed.dir, `${parsed.name}.${companion_file_type}`)
 
          if (!Fs.existsSync(matching_file)) {
             try {
