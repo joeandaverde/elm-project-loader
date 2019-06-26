@@ -4,8 +4,8 @@ const _ = require('lodash')
 const Path = require('path')
 const LoaderUtils = require('loader-utils')
 const Fs = require('fs')
-const GlobFs = require('glob-fs')
 const Spawn = require('child_process').spawn
+const Globby = require('globby')
 const TempFile = require('temp')
 
 const CreateSolution = options => {
@@ -131,11 +131,8 @@ const CrawlDependencies = solution => {
 
    return Promise.all(
          _.map(searchDirs, p => {
-            return GlobFs({
+            return Globby('**/*.elm',{
                   gitignore: true,
-                  dotfiles: true,
-               })
-               .readdirPromise('**/*.elm', {
                   cwd: p,
                })
                .then(res => _.filter(res, r => /elm$/i.test(r)))
@@ -155,10 +152,10 @@ const CrawlDependencies = solution => {
 // Adapted from checkFiles by https://github.com/samrensenhouse
 const cleanMismatchedTempFiles = (file_type_to_check, companion_file_type) => {
    try {
-      const files = GlobFs({
+      const files = Globby.sync(`elm-stuff/**/*.${file_type_to_check}`,{
          gitignore: false,
          dotfiles: true,
-      }).readdirSync(`elm-stuff/**/*.${file_type_to_check}`)
+      });
 
       _.forEach(files, file => {
          const parsed = Path.parse(file)
