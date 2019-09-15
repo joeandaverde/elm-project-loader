@@ -1,17 +1,17 @@
 {
-  "name": "elm-webpack-project-loader",
-  "version": "3.0.1",
-  "description": "Webpack Loader for Elm Projects.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Joe Andaverde",
-  "license": "MIT",
-  "dependencies": {
-    "globby": "^9.2.0",
-    "loader-utils": "^1.1.0",
-    "lodash": "^4.17.5",
-    "temp": "^0.8.3"
-  }
+   "name": "elm-webpack-project-loader",
+   "version": "3.0.2",
+   "description": "Webpack Loader for Elm Projects.",
+   "main": "index.js",
+   "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+   },
+   "author": "Joe Andaverde",
+   "license": "MIT",
+   "dependencies": {
+      "globby": "^9.2.0",
+      "loader-utils": "^1.1.0",
+      "lodash": "^4.17.15",
+      "temp": "^0.9.0"
+   }
 }
