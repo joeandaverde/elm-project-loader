@@ -149,30 +149,6 @@ const CrawlDependencies = solution => {
       })
 }
 
-// Adapted from checkFiles by https://github.com/samrensenhouse
-const cleanMismatchedTempFiles = (file_type_to_check, companion_file_type) => {
-   try {
-      const files = Globby.sync(`elm-stuff/**/*.${file_type_to_check}`,{
-         gitignore: false,
-         dotfiles: true,
-      });
-
-      _.forEach(files, file => {
-         const parsed = Path.parse(file)
-         const matching_file = Path.resolve(parsed.dir, `${parsed.name}.${companion_file_type}`)
-
-         if (!Fs.existsSync(matching_file)) {
-            try {
-               Fs.unlinkSync(file)
-            } catch (e) {}
-         }
-      })
-
-   } catch (error) {
-      console.log(`Error cleaning mismatched ${companion_file_type} files`, error)
-   }
-}
-
 const Compile = solution => {
    const collectOutput = stream => {
       let output = ''
@@ -197,10 +173,6 @@ const Compile = solution => {
 
                const elmArgs = _.compact(['make', debug, optimize, '--output', info.path].concat(solution['main-modules']))
 
-               if (process.env.NODE_ENV !== 'production') {
-                  cleanMismatchedTempFiles('elmi', 'elmo')
-                  cleanMismatchedTempFiles('elmo', 'elmi')
-               }
 
                const elmMakeProc = Spawn('elm', elmArgs, {
                   cwd: solution['elm-json-dir'],
